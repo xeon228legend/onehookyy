@@ -149,6 +149,7 @@
     const sendBtn = document.getElementById('send-btn');
     const statusMsg = document.getElementById('status-msg');
 
+    // Восстанавливаем сохранённый URL вебхука
     const savedUrl = localStorage.getItem('oneui_webhook_url');
     if (savedUrl) urlInput.value = savedUrl;
 
@@ -169,29 +170,30 @@
       sendBtn.disabled = true;
       showStatus('Отправка...', '#8e8e93');
 
-      // Обходим стандартные фильтры DNS через альтернативный официальный домен
+      // Меняем заблокированный discord.com на официальный рабочий discordapp.com
       if (url.includes('discord.com')) {
         url = url.replace('discord.com', 'discordapp.com');
       }
 
       try {
-        // mode: 'no-cors' позволяет пробить ограничения происхождения запроса в браузере
-        await fetch(url, {
+        const response = await fetch(url, {
           method: 'POST',
-          mode: 'no-cors',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ content: content })
         });
 
-        // Так как при 'no-cors' браузер изолирует ответ сервера, мы сразу выводим успех
-        showStatus('Запрос отправлен!', '#34c759');
-        contentInput.value = '';
-
+        // Успешный ответ от Дискорда — это статус 200-299 (обычно 204 No Content)
+        if (response.ok || response.status === 204) {
+          showStatus('Успешно отправлено!', '#34c759');
+          contentInput.value = '';
+        } else {
+          showStatus(`Ошибка сервера: ${response.status}`, '#ff3b30');
+        }
       } catch (error) {
         console.error(error);
-        showStatus('Ошибка сети! Проверь подключение / VPN.', '#ff3b30');
+        showStatus('Ошибка сети! Убедись, что VPN включен.', '#ff3b30');
       } finally {
         sendBtn.disabled = false;
       }
