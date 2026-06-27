@@ -1,4 +1,149 @@
-<script>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneUI Webhook Sender</title>
+  <style>
+    :root {
+      --bg-main: #0a0a0a;
+      --bg-card: #161618;
+      --bg-input: #222224;
+      --accent: #007aff;
+      --text-main: #ffffff;
+      --text-sub: #8e8e93;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .oneui-container {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .oneui-header {
+      text-align: center;
+      margin-bottom: 35px;
+      padding: 10px 0;
+    }
+
+    .oneui-header h1 {
+      font-size: 34px;
+      font-weight: 300;
+      margin: 0;
+    }
+
+    .oneui-header p {
+      font-size: 14px;
+      color: var(--text-sub);
+      margin: 8px 0 0 0;
+    }
+
+    .oneui-card {
+      background: var(--bg-card);
+      border-radius: 28px;
+      padding: 24px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .oneui-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: none;
+      border-radius: 16px;
+      padding: 16px;
+      color: var(--text-main);
+      font-size: 16px;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    textarea.oneui-input {
+      resize: vertical;
+      min-height: 120px;
+      font-family: inherit;
+    }
+
+    .oneui-btn {
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-sizing: border-box;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .oneui-btn:disabled {
+      background: #2c2c2e;
+      color: var(--text-sub);
+      cursor: not-allowed;
+    }
+
+    .oneui-btn:not(:disabled):active {
+      transform: scale(0.98);
+      background: #0063cc;
+    }
+
+    #status-msg {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 14px;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="oneui-container">
+    
+    <div class="oneui-header">
+      <h1>OneHook</h1>
+      <p>Управление Discord Webhook</p>
+    </div>
+
+    <div class="oneui-card">
+      <div class="card-title">Конфигурация</div>
+      <input type="text" id="webhook-url" class="oneui-input" placeholder="URL вебхука Дискорда">
+    </div>
+
+    <div class="oneui-card">
+      <div class="card-title">Сообщение</div>
+      <textarea id="webhook-content" class="oneui-input" placeholder="Введите текст сообщения..."></textarea>
+      <button id="send-btn" class="oneui-btn" style="margin-top: 16px;">Отправить в Discord</button>
+      <div id="status-msg"></div>
+    </div>
+
+  </div>
+
+  <script>
     const urlInput = document.getElementById('webhook-url');
     const contentInput = document.getElementById('webhook-content');
     const sendBtn = document.getElementById('send-btn');
@@ -24,14 +169,14 @@
       sendBtn.disabled = true;
       showStatus('Отправка...', '#8e8e93');
 
-      // Пробуем альтернативный официальный домен, который реже блокируют по DNS
+      // Обходим стандартные фильтры DNS через альтернативный официальный домен
       if (url.includes('discord.com')) {
         url = url.replace('discord.com', 'discordapp.com');
       }
 
       try {
-        // Добавляем режим 'no-cors', чтобы запросы проходили локальные ограничения браузера
-        const response = await fetch(url, {
+        // mode: 'no-cors' позволяет пробить ограничения происхождения запроса в браузере
+        await fetch(url, {
           method: 'POST',
           mode: 'no-cors',
           headers: {
@@ -40,14 +185,13 @@
           body: JSON.stringify({ content: content })
         });
 
-        // При 'no-cors' браузер не выдаст ответ (response.ok будет false), 
-        // но сам запрос физически улетает на сервера Дискорда.
+        // Так как при 'no-cors' браузер изолирует ответ сервера, мы сразу выводим успех
         showStatus('Запрос отправлен!', '#34c759');
         contentInput.value = '';
 
       } catch (error) {
         console.error(error);
-        showStatus('Ошибка сети! Включи VPN на ПК.', '#ff3b30');
+        showStatus('Ошибка сети! Проверь подключение / VPN.', '#ff3b30');
       } finally {
         sendBtn.disabled = false;
       }
@@ -58,3 +202,5 @@
       statusMsg.style.color = color;
     }
   </script>
+</body>
+</html>
