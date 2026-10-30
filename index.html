@@ -1,208 +1,786 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OneUI Webhook Sender</title>
-  <style>
-    :root {
-      --bg-main: #0a0a0a;
-      --bg-card: #161618;
-      --bg-input: #222224;
-      --accent: #007aff;
-      --text-main: #ffffff;
-      --text-sub: #8e8e93;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebCraft — игровая система</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    image-rendering: pixelated;
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+  }
 
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+  body {
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+      repeating-linear-gradient(45deg, #2d2d2d 0px, #2d2d2d 4px, #252525 4px, #252525 8px);
+    padding: 12px;
+  }
 
-    .oneui-container {
-      width: 100%;
-      max-width: 480px;
-      padding: 20px;
-      box-sizing: border-box;
-    }
+  .webcraft-container {
+    width: 100%;
+    max-width: 1024px;
+    background: #c6c6c6;
+    border: 4px solid #373737;
+    border-top-color: #8b8b8b;
+    border-left-color: #8b8b8b;
+    border-bottom-color: #2a2a2a;
+    border-right-color: #2a2a2a;
+    box-shadow: 0 0 0 2px #000, inset 0 0 0 2px #dfdfdf;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 
-    .oneui-header {
-      text-align: center;
-      margin-bottom: 35px;
-      padding: 10px 0;
-    }
+  .mc-header {
+    background: #3f3f3f;
+    border: 2px solid #1a1a1a;
+    border-top-color: #5a5a5a;
+    border-left-color: #5a5a5a;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 
-    .oneui-header h1 {
-      font-size: 34px;
-      font-weight: 300;
-      margin: 0;
-    }
+  .mc-logo { display: flex; align-items: center; gap: 8px; }
 
-    .oneui-header p {
-      font-size: 14px;
-      color: var(--text-sub);
-      margin: 8px 0 0 0;
-    }
+  .mc-logo-icon {
+    width: 32px; height: 32px;
+    background: #5d8c3e;
+    border: 3px solid #2a3d1a;
+    border-top-color: #8bb85a;
+    border-left-color: #8bb85a;
+    box-shadow: 0 0 0 2px #000;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: bold;
+    color: #fff; text-shadow: 2px 2px 0 #2a3d1a;
+  }
 
-    .oneui-card {
-      background: var(--bg-card);
-      border-radius: 28px;
-      padding: 24px;
-      margin-bottom: 16px;
-      box-sizing: border-box;
-    }
+  .mc-title {
+    font-size: 22px; font-weight: bold;
+    color: #ffff55;
+    text-shadow: 3px 3px 0 #3f3f00, 2px 2px 0 #2a2a00;
+    letter-spacing: 2px;
+  }
 
-    .card-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 16px;
-    }
+  .mc-status {
+    font-size: 11px; color: #55ff55;
+    text-shadow: 2px 2px 0 #1a3a1a;
+    display: flex; align-items: center; gap: 6px;
+  }
 
-    .oneui-input {
-      width: 100%;
-      background: var(--bg-input);
-      border: none;
-      border-radius: 16px;
-      padding: 16px;
-      color: var(--text-main);
-      font-size: 16px;
-      box-sizing: border-box;
-      outline: none;
-    }
+  .status-dot {
+    width: 10px; height: 10px;
+    background: #55ff55;
+    border: 2px solid #1a3a1a;
+    animation: pulse 2s infinite;
+  }
 
-    textarea.oneui-input {
-      resize: vertical;
-      min-height: 120px;
-      font-family: inherit;
-    }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
 
-    .oneui-btn {
-      width: 100%;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 24px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      box-sizing: border-box;
-      transition: background 0.2s, transform 0.1s;
-    }
+  .mc-tabs {
+    display: flex; gap: 4px; flex-wrap: wrap;
+    border-bottom: 2px solid #373737;
+    padding-bottom: 4px;
+  }
 
-    .oneui-btn:disabled {
-      background: #2c2c2e;
-      color: var(--text-sub);
-      cursor: not-allowed;
-    }
+  .mc-tab {
+    background: #8b8b8b;
+    border: 2px solid #373737;
+    border-top-color: #c6c6c6;
+    border-left-color: #c6c6c6;
+    padding: 8px 16px;
+    font-family: inherit; font-size: 12px; font-weight: bold;
+    color: #3f3f3f;
+    text-shadow: 1px 1px 0 #dfdfdf;
+    cursor: pointer; user-select: none;
+  }
 
-    .oneui-btn:not(:disabled):active {
-      transform: scale(0.98);
-      background: #0063cc;
-    }
+  .mc-tab:hover { background: #a0a0a0; color: #1a1a1a; }
 
-    #status-msg {
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
-      margin-top: 14px;
-      min-height: 20px;
+  .mc-tab.active {
+    background: #c6c6c6;
+    border-color: #373737;
+    border-bottom-color: #c6c6c6;
+    color: #1a1a1a;
+    text-shadow: 1px 1px 0 #fff;
+    transform: translateY(2px);
+    margin-bottom: -2px;
+  }
+
+  .mc-content {
+    background: #8b8b8b;
+    border: 3px solid #373737;
+    border-top-color: #5a5a5a;
+    border-left-color: #5a5a5a;
+    padding: 12px;
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mc-panel {
+    background: #c6c6c6;
+    border: 3px solid #373737;
+    border-top-color: #dfdfdf;
+    border-left-color: #dfdfdf;
+    border-bottom-color: #5a5a5a;
+    border-right-color: #5a5a5a;
+    padding: 10px;
+  }
+
+  .mc-panel-title {
+    font-size: 14px; font-weight: bold;
+    color: #1a1a1a;
+    text-shadow: 1px 1px 0 #fff;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #8b8b8b;
+    padding-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  .mc-btn {
+    background: #8b8b8b;
+    border: 3px solid #373737;
+    border-top-color: #c6c6c6;
+    border-left-color: #c6c6c6;
+    border-bottom-color: #2a2a2a;
+    border-right-color: #2a2a2a;
+    padding: 8px 16px;
+    font-family: inherit; font-size: 12px; font-weight: bold;
+    color: #1a1a1a;
+    text-shadow: 1px 1px 0 #dfdfdf;
+    cursor: pointer; user-select: none;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+
+  .mc-btn:hover { background: #a0a0a0; color: #000; }
+
+  .mc-btn:active {
+    border-top-color: #2a2a2a;
+    border-left-color: #2a2a2a;
+    border-bottom-color: #c6c6c6;
+    border-right-color: #c6c6c6;
+    background: #7a7a7a;
+  }
+
+  .mc-btn.primary {
+    background: #5d8c3e;
+    border-top-color: #8bb85a;
+    border-left-color: #8bb85a;
+    border-bottom-color: #2a3d1a;
+    border-right-color: #2a3d1a;
+    color: #fff; text-shadow: 1px 1px 0 #2a3d1a;
+  }
+
+  .mc-btn.primary:hover { background: #6fa04a; }
+
+  .mc-btn.primary:active {
+    border-top-color: #2a3d1a;
+    border-left-color: #2a3d1a;
+    border-bottom-color: #8bb85a;
+    border-right-color: #8bb85a;
+    background: #4a7030;
+  }
+
+  .mc-btn.danger {
+    background: #a83a3a;
+    border-top-color: #d45a5a;
+    border-left-color: #d45a5a;
+    border-bottom-color: #5a1a1a;
+    border-right-color: #5a1a1a;
+    color: #fff; text-shadow: 1px 1px 0 #5a1a1a;
+  }
+
+  .mc-btn.danger:hover { background: #c44a4a; }
+
+  .mc-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .hidden { display: none !important; }
+
+  .mc-score {
+    font-size: 13px; font-weight: bold;
+    color: #1a1a1a;
+    text-shadow: 1px 1px 0 #dfdfdf;
+    background: #8b8b8b;
+    border: 2px solid #373737;
+    border-top-color: #5a5a5a;
+    border-left-color: #5a5a5a;
+    padding: 6px 12px;
+  }
+
+  .mc-score span { color: #ffff55; text-shadow: 1px 1px 0 #3f3f00; }
+
+  /* ===== 2048 ===== */
+  .game2048-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+
+  .board-2048 {
+    display: grid;
+    grid-template-columns: repeat(4, 64px);
+    grid-template-rows: repeat(4, 64px);
+    gap: 6px;
+    background: #8b8b8b;
+    border: 3px solid #373737;
+    border-top-color: #5a5a5a;
+    border-left-color: #5a5a5a;
+    padding: 6px;
+  }
+
+  .tile-2048 {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: bold;
+    color: #fff;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+    border: 2px solid rgba(0,0,0,0.3);
+    transition: none;
+    user-select: none;
+  }
+
+  .tile-2048[data-val="0"]  { background: #a0a0a0; }
+  .tile-2048[data-val="2"]  { background: #eee4da; color: #3f3f3f; text-shadow: none; }
+  .tile-2048[data-val="4"]  { background: #ede0c8; color: #3f3f3f; text-shadow: none; }
+  .tile-2048[data-val="8"]  { background: #f2b179; }
+  .tile-2048[data-val="16"] { background: #f59563; }
+  .tile-2048[data-val="32"] { background: #f67c5f; }
+  .tile-2048[data-val="64"] { background: #f65e3b; }
+  .tile-2048[data-val="128"]{ background: #edcf72; font-size: 19px; }
+  .tile-2048[data-val="256"]{ background: #edcc61; font-size: 19px; }
+  .tile-2048[data-val="512"]{ background: #edc850; font-size: 19px; }
+  .tile-2048[data-val="1024"]{ background: #edc53f; font-size: 16px; }
+  .tile-2048[data-val="2048"]{ background: #edc22e; font-size: 16px; }
+  .tile-2048.big { background: #3c3a32; font-size: 14px; }
+
+  /* ===== ЗМЕЙКА ===== */
+  .snake-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+  .snake-canvas {
+    background: #1a1a1a;
+    border: 3px solid #373737;
+    border-top-color: #5a5a5a;
+    border-left-color: #5a5a5a;
+    image-rendering: pixelated;
+  }
+
+  /* ===== САПЁР ===== */
+  .mines-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+  .mines-grid {
+    display: grid;
+    gap: 2px;
+    background: #5a5a5a;
+    border: 3px solid #373737;
+    border-top-color: #5a5a5a;
+    border-left-color: #5a5a5a;
+    padding: 2px;
+  }
+
+  .mine-cell {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: bold;
+    font-family: 'Courier New', monospace;
+    background: #8b8b8b;
+    border: 2px solid #c6c6c6;
+    border-bottom-color: #5a5a5a;
+    border-right-color: #5a5a5a;
+    cursor: pointer;
+    user-select: none;
+    color: #1a1a1a;
+  }
+
+  .mine-cell:hover { background: #a0a0a0; }
+
+  .mine-cell.revealed {
+    background: #b8b8b8;
+    border: 1px solid #8b8b8b;
+    cursor: default;
+  }
+
+  .mine-cell.revealed:hover { background: #b8b8b8; }
+
+  .mine-cell.flag { color: #c44a4a; }
+
+  .mine-cell.mine {
+    background: #a83a3a;
+    color: #fff;
+  }
+
+  .mine-cell[data-n="1"] { color: #0000ff; }
+  .mine-cell[data-n="2"] { color: #008000; }
+  .mine-cell[data-n="3"] { color: #ff0000; }
+  .mine-cell[data-n="4"] { color: #000080; }
+  .mine-cell[data-n="5"] { color: #800000; }
+  .mine-cell[data-n="6"] { color: #008080; }
+  .mine-cell[data-n="7"] { color: #000000; }
+  .mine-cell[data-n="8"] { color: #808080; }
+
+  .mc-about-text {
+    font-size: 12px; color: #1a1a1a;
+    line-height: 1.8;
+    text-shadow: 1px 1px 0 #dfdfdf;
+  }
+
+  .mc-about-text h3 {
+    color: #3f3f00;
+    text-shadow: 1px 1px 0 #ffffaa;
+    margin: 8px 0 4px;
+    font-size: 14px;
+  }
+
+  .mc-about-text .highlight { color: #2a5a1a; font-weight: bold; }
+
+  .mc-game-over {
+    font-size: 16px; font-weight: bold;
+    color: #ffff55;
+    text-shadow: 2px 2px 0 #3f3f00;
+    text-align: center;
+    padding: 8px;
+  }
+
+  @media (max-width: 600px) {
+    .mc-title { font-size: 16px; }
+    .mc-logo-icon { width: 24px; height: 24px; font-size: 14px; }
+    .mc-tab { padding: 6px 10px; font-size: 10px; }
+    .board-2048 {
+      grid-template-columns: repeat(4, 52px);
+      grid-template-rows: repeat(4, 52px);
     }
-  </style>
+    .tile-2048 { font-size: 18px; }
+    .tile-2048[data-val="1024"],
+    .tile-2048[data-val="2048"] { font-size: 13px; }
+    .mine-cell { width: 22px; height: 22px; font-size: 12px; }
+  }
+</style>
 </head>
 <body>
 
-  <div class="oneui-container">
-    
-    <div class="oneui-header">
-      <h1>OneHook</h1>
-      <p>Управление Discord Webhook</p>
+<div class="webcraft-container">
+
+  <header class="mc-header">
+    <div class="mc-logo">
+      <div class="mc-logo-icon">⛏</div>
+      <div class="mc-title">WEBCRAFT</div>
+    </div>
+    <div class="mc-status">
+      <div class="status-dot"></div>
+      <span>СИСТЕМА АКТИВНА</span>
+    </div>
+  </header>
+
+  <div class="mc-tabs" id="tabs">
+    <button class="mc-tab active" data-tab="g2048">🔢 2048</button>
+    <button class="mc-tab" data-tab="snake">🐍 ЗМЕЙКА</button>
+    <button class="mc-tab" data-tab="mines">💣 САПЁР</button>
+    <button class="mc-tab" data-tab="about">ℹ️ О СИСТЕМЕ</button>
+  </div>
+
+  <div class="mc-content">
+
+    <!-- ============ 2048 ============ -->
+    <div id="tab-g2048" class="tab-panel">
+      <div class="mc-panel">
+        <div class="mc-panel-title">🔢 2048</div>
+        <div class="game2048-wrap">
+          <div class="mc-row" style="justify-content: center;">
+            <div class="mc-score">Счёт: <span id="score2048">0</span></div>
+            <div class="mc-score">Рекорд: <span id="best2048">0</span></div>
+          </div>
+          <div class="board-2048" id="board2048"></div>
+          <div class="mc-game-over hidden" id="gameOver2048">ИГРА ОКОНЧЕНА</div>
+          <div class="mc-row">
+            <button class="mc-btn primary" onclick="newGame2048()">🔄 НОВАЯ ИГРА</button>
+          </div>
+          <div class="mc-about-text" style="text-align:center;">
+            Управление: <span class="highlight">стрелки</span> или <span class="highlight">WASD</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="oneui-card">
-      <div class="card-title">Конфигурация</div>
-      <input type="text" id="webhook-url" class="oneui-input" placeholder="URL вебхука Дискорда">
+    <!-- ============ ЗМЕЙКА ============ -->
+    <div id="tab-snake" class="tab-panel hidden">
+      <div class="mc-panel">
+        <div class="mc-panel-title">🐍 ЗМЕЙКА</div>
+        <div class="snake-wrap">
+          <div class="mc-row" style="justify-content: center;">
+            <div class="mc-score">Счёт: <span id="scoreSnake">0</span></div>
+            <div class="mc-score">Рекорд: <span id="bestSnake">0</span></div>
+          </div>
+          <canvas class="snake-canvas" id="snakeCanvas" width="400" height="400"></canvas>
+          <div class="mc-row">
+            <button class="mc-btn primary" onclick="startSnake()">▶ СТАРТ / ЗАНОВО</button>
+            <button class="mc-btn" onclick="pauseSnake()">⏸ ПАУЗА</button>
+          </div>
+          <div class="mc-about-text" style="text-align:center;">
+            Управление: <span class="highlight">стрелки</span> или <span class="highlight">WASD</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="oneui-card">
-      <div class="card-title">Сообщение</div>
-      <textarea id="webhook-content" class="oneui-input" placeholder="Введите текст сообщения..."></textarea>
-      <button id="send-btn" class="oneui-btn" style="margin-top: 16px;">Отправить в Discord</button>
-      <div id="status-msg"></div>
+    <!-- ============ САПЁР ============ -->
+    <div id="tab-mines" class="tab-panel hidden">
+      <div class="mc-panel">
+        <div class="mc-panel-title">💣 САПЁР</div>
+        <div class="mines-wrap">
+          <div class="mc-row" style="justify-content: center;">
+            <div class="mc-score">Мины: <span id="minesLeft">10</span></div>
+            <div class="mc-score">Время: <span id="minesTime">0</span></div>
+          </div>
+          <div class="mines-grid" id="minesGrid"></div>
+          <div class="mc-game-over hidden" id="minesStatus"></div>
+          <div class="mc-row">
+            <button class="mc-btn primary" onclick="newMines()">🔄 НОВАЯ ИГРА</button>
+          </div>
+          <div class="mc-about-text" style="text-align:center;">
+            ЛКМ — открыть, <span class="highlight">ПКМ</span> — флажок 🚩
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ О СИСТЕМЕ ============ -->
+    <div id="tab-about" class="tab-panel hidden">
+      <div class="mc-panel">
+        <div class="mc-panel-title">ℹ️ О СИСТЕМЕ WEBCRAFT</div>
+        <div class="mc-about-text">
+          <h3>⛏ WebCraft v2.0</h3>
+          Внутриигровая веб-система для модов браузера в Minecraft.<br>
+          Работает на HTML/CSS/JS и отображается на экранах<br>
+          модов типа <span class="highlight">WebDisplays</span>, <span class="highlight">MCEF</span> или аналогичных.<br><br>
+
+          <h3>🎮 Встроенные игры</h3>
+          • <span class="highlight">2048</span> — классическая головоломка с плитками<br>
+          • <span class="highlight">Змейка</span> — собирайте еду и растите<br>
+          • <span class="highlight">Сапёр</span> — найдите все мины без подрыва<br><br>
+
+          <h3>🔧 Как использовать</h3>
+          1. Установите мод для браузера в Minecraft<br>
+          2. Разместите экран и вставьте этот HTML-код<br>
+          3. Играйте прямо в игре!<br><br>
+
+          <h3>📌 Техническая информация</h3>
+          Разрешение: адаптивное<br>
+          Шрифт: Courier New / monospace<br>
+          Стиль: пиксельный, Minecraft-like<br>
+          Совместимость: WebDisplays, MCEF, Chromium-моды
+        </div>
+      </div>
     </div>
 
   </div>
 
-  <script>
-    const urlInput = document.getElementById('webhook-url');
-    const contentInput = document.getElementById('webhook-content');
-    const sendBtn = document.getElementById('send-btn');
-    const statusMsg = document.getElementById('status-msg');
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; font-size: 10px; color: #3f3f3f; text-shadow: 1px 1px 0 #dfdfdf;">
+    <span>WEBCRAFT • MINECRAFT UI</span>
+    <span id="clock">00:00:00</span>
+  </div>
 
-    // Восстанавливаем сохранённый URL вебхука
-    const savedUrl = localStorage.getItem('oneui_webhook_url');
-    if (savedUrl) urlInput.value = savedUrl;
+</div>
 
-    sendBtn.addEventListener('click', async () => {
-      let url = urlInput.value.trim();
-      const content = contentInput.value.trim();
+<script>
+/* ======================== ОБЩЕЕ ======================== */
 
-      if (!url) {
-        showStatus('Введите URL вебхука!', '#ff3b30');
-        return;
-      }
-      if (!content) {
-        showStatus('Сообщение не может быть пустым!', '#ff3b30');
-        return;
-      }
-
-      localStorage.setItem('oneui_webhook_url', url);
-      sendBtn.disabled = true;
-      showStatus('Отправка...', '#8e8e93');
-
-      // Меняем заблокированный discord.com на официальный рабочий discordapp.com
-      if (url.includes('discord.com')) {
-        url = url.replace('discord.com', 'discordapp.com');
-      }
-
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ content: content })
-        });
-
-        // Успешный ответ от Дискорда — это статус 200-299 (обычно 204 No Content)
-        if (response.ok || response.status === 204) {
-          showStatus('Успешно отправлено!', '#34c759');
-          contentInput.value = '';
-        } else {
-          showStatus(`Ошибка сервера: ${response.status}`, '#ff3b30');
-        }
-      } catch (error) {
-        console.error(error);
-        showStatus('Ошибка сети! Убедись, что VPN включен.', '#ff3b30');
-      } finally {
-        sendBtn.disabled = false;
-      }
-    });
-
-    function showStatus(text, color) {
-      statusMsg.textContent = text;
-      statusMsg.style.color = color;
+// Переключение вкладок
+document.querySelectorAll('.mc-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mc-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
+    // при переходе на вкладку змейки — фокус на канвас
+    if (tab.dataset.tab === 'snake') {
+      document.getElementById('snakeCanvas').focus();
     }
-  </script>
-</body>
-</html>
+  });
+});
+
+// Часы
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// localStorage helper
+function loadBest(key) {
+  return parseInt(localStorage.getItem('webcraft_' + key) || '0');
+}
+function saveBest(key, val) {
+  if (val > loadBest(key)) localStorage.setItem('webcraft_' + key, val);
+}
+
+/* ======================== 2048 ======================== */
+
+let board2048 = [];
+let score2048 = 0;
+let best2048 = loadBest('best2048');
+document.getElementById('best2048').textContent = best2048;
+let gameOver2048 = false;
+
+function initBoard2048() {
+  board2048 = Array(4).fill().map(() => Array(4).fill(0));
+  score2048 = 0;
+  gameOver2048 = false;
+  document.getElementById('score2048').textContent = '0';
+  document.getElementById('gameOver2048').classList.add('hidden');
+  addRandomTile2048();
+  addRandomTile2048();
+  render2048();
+}
+
+function addRandomTile2048() {
+  const empty = [];
+  for (let r = 0; r < 4; r++)
+    for (let c = 0; c < 4; c++)
+      if (board2048[r][c] === 0) empty.push([r, c]);
+  if (empty.length === 0) return;
+  const [r, c] = empty[Math.floor(Math.random() * empty.length)];
+  board2048[r][c] = Math.random() < 0.9 ? 2 : 4;
+}
+
+function render2048() {
+  const board = document.getElementById('board2048');
+  board.innerHTML = '';
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      const val = board2048[r][c];
+      const tile = document.createElement('div');
+      tile.className = 'tile-2048' + (val > 2048 ? ' big' : '');
+      tile.dataset.val = val;
+      tile.textContent = val === 0 ? '' : val;
+      board.appendChild(tile);
+    }
+  }
+  document.getElementById('score2048').textContent = score2048;
+  if (score2048 > best2048) {
+    best2048 = score2048;
+    saveBest('best2048', best2048);
+    document.getElementById('best2048').textContent = best2048;
+  }
+}
+
+function slideRow2048(row) {
+  // сдвиг влево
+  let arr = row.filter(v => v !== 0);
+  let result = [];
+  let i = 0;
+  while (i < arr.length) {
+    if (i + 1 < arr.length && arr[i] === arr[i + 1]) {
+      result.push(arr[i] * 2);
+      score2048 += arr[i] * 2;
+      i += 2;
+    } else {
+      result.push(arr[i]);
+      i++;
+    }
+  }
+  while (result.length < 4) result.push(0);
+  return result;
+}
+
+function move2048(dir) {
+  if (gameOver2048) return;
+  const prev = JSON.stringify(board2048);
+  let moved = false;
+
+  if (dir === 'left' || dir === 'right') {
+    for (let r = 0; r < 4; r++) {
+      let row = board2048[r].slice();
+      if (dir === 'right') row.reverse();
+      row = slideRow2048(row);
+      if (dir === 'right') row.reverse();
+      if (JSON.stringify(row) !== JSON.stringify(board2048[r])) moved = true;
+      board2048[r] = row;
+    }
+  } else {
+    for (let c = 0; c < 4; c++) {
+      let col = [];
+      for (let r = 0; r < 4; r++) col.push(board2048[r][c]);
+      if (dir === 'down') col.reverse();
+      col = slideRow2048(col);
+      if (dir === 'down') col.reverse();
+      for (let r = 0; r < 4; r++) {
+        if (board2048[r][c] !== col[r]) moved = true;
+        board2048[r][c] = col[r];
+      }
+    }
+  }
+
+  if (moved) {
+    addRandomTile2048();
+    render2048();
+    if (isGameOver2048()) {
+      gameOver2048 = true;
+      document.getElementById('gameOver2048').classList.remove('hidden');
+    }
+  }
+}
+
+function isGameOver2048() {
+  for (let r = 0; r < 4; r++)
+    for (let c = 0; c < 4; c++) {
+      if (board2048[r][c] === 0) return false;
+      if (c < 3 && board2048[r][c] === board2048[r][c + 1]) return false;
+      if (r < 3 && board2048[r][c] === board2048[r + 1][c]) return false;
+    }
+  return true;
+}
+
+function newGame2048() {
+  initBoard2048();
+}
+
+// Клавиши для 2048 (только когда вкладка активна)
+document.addEventListener('keydown', e => {
+  const tab = document.getElementById('tab-g2048');
+  if (tab.classList.contains('hidden')) return;
+  const key = e.key.toLowerCase();
+  if (['arrowleft', 'a'].includes(key)) { e.preventDefault(); move2048('left'); }
+  if (['arrowright', 'd'].includes(key)) { e.preventDefault(); move2048('right'); }
+  if (['arrowup', 'w'].includes(key)) { e.preventDefault(); move2048('up'); }
+  if (['arrowdown', 's'].includes(key)) { e.preventDefault(); move2048('down'); }
+});
+
+initBoard2048();
+
+/* ======================== ЗМЕЙКА ======================== */
+
+const snakeCanvas = document.getElementById('snakeCanvas');
+const snakeCtx = snakeCanvas.getContext('2d');
+const SNAKE_SIZE = 20;
+const SNAKE_CELLS = snakeCanvas.width / SNAKE_SIZE;
+
+let snake = [];
+let snakeDir = { x: 1, y: 0 };
+let snakeNextDir = { x: 1, y: 0 };
+let snakeFood = { x: 0, y: 0 };
+let snakeScore = 0;
+let snakeBest = loadBest('bestSnake');
+let snakeLoop = null;
+let snakePaused = false;
+let snakeRunning = false;
+
+document.getElementById('bestSnake').textContent = snakeBest;
+
+function randomFood() {
+  let pos;
+  do {
+    pos = {
+      x: Math.floor(Math.random() * SNAKE_CELLS),
+      y: Math.floor(Math.random() * SNAKE_CELLS)
+    };
+  } while (snake.some(s => s.x === pos.x && s.y === pos.y));
+  snakeFood = pos;
+}
+
+function drawSnake() {
+  snakeCtx.fillStyle = '#1a1a1a';
+  snakeCtx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+
+  // сетка (едва заметная)
+  snakeCtx.strokeStyle = 'rgba(255,255,255,0.03)';
+  for (let i = 0; i <= SNAKE_CELLS; i++) {
+    snakeCtx.beginPath();
+    snakeCtx.moveTo(i * SNAKE_SIZE, 0);
+    snakeCtx.lineTo(i * SNAKE_SIZE, snakeCanvas.height);
+    snakeCtx.stroke();
+    snakeCtx.beginPath();
+    snakeCtx.moveTo(0, i * SNAKE_SIZE);
+    snakeCtx.lineTo(snakeCanvas.width, i * SNAKE_SIZE);
+    snakeCtx.stroke();
+  }
+
+  // еда
+  snakeCtx.fillStyle = '#edc22e';
+  snakeCtx.fillRect(snakeFood.x * SNAKE_SIZE + 2, snakeFood.y * SNAKE_SIZE + 2, SNAKE_SIZE - 4, SNAKE_SIZE - 4);
+  snakeCtx.fillStyle = '#ffff55';
+  snakeCtx.fillRect(snakeFood.x * SNAKE_SIZE + 6, snakeFood.y * SNAKE_SIZE + 6, SNAKE_SIZE - 12, SNAKE_SIZE - 12);
+
+  // змейка
+  snake.forEach((seg, i) => {
+    if (i === 0) {
+      snakeCtx.fillStyle = '#8bb85a';
+    } else {
+      snakeCtx.fillStyle = i % 2 === 0 ? '#5d8c3e' : '#6fa04a';
+    }
+    snakeCtx.fillRect(seg.x * SNAKE_SIZE + 1, seg.y * SNAKE_SIZE + 1, SNAKE_SIZE - 2, SNAKE_SIZE - 2);
+    snakeCtx.strokeStyle = '#2a3d1a';
+    snakeCtx.lineWidth = 1;
+    snakeCtx.strokeRect(seg.x * SNAKE_SIZE + 1, seg.y * SNAKE_SIZE + 1, SNAKE_SIZE - 2, SNAKE_SIZE - 2);
+  });
+}
+
+function stepSnake() {
+  if (snakePaused || !snakeRunning) return;
+
+  snakeDir = { ...snakeNextDir };
+  const head = { x: snake[0].x + snakeDir.x, y: snake[0].y + snakeDir.y };
+
+  // стена
+  if (head.x < 0 || head.x >= SNAKE_CELLS || head.y < 0 || head.y >= SNAKE_CELLS) {
+    endSnake();
+    return;
+  }
+  // себя
+  if (snake.some(s => s.x === head.x && s.y === head.y)) {
+    endSnake();
+    return;
+  }
+
+  snake.unshift(head);
+
+  if (head.x === snakeFood.x && head.y === snakeFood.y) {
+    snakeScore++;
+    document.getElementById('scoreSnake').textContent = snakeScore;
+    if (snakeScore > snakeBest) {
+      snakeBest = snakeScore;
+      saveBest('bestSnake', snakeBest);
+      document.getElementById('bestSnake').textContent = snakeBest;
+    }
+    randomFood();
+  } else {
+    snake.pop();
+  }
+
+  drawSnake();
+}
+
+function endSnake() {
+  snakeRunning = false;
+  clearInterval(snakeLoop);
+  snakeLoop = null;
+  drawSnake();
+  // сообщение поверх
+  snakeCtx.fillStyle = 'rgba(0,0,0,0.6)';
+  snakeCtx.fillRect(0, snakeCanvas.height / 2 - 40, snakeCanvas.width, 80);
+  snakeCtx.fillStyle = '#ffff55';
+  snakeCtx.font = 'bold 22px Courier New';
+  snakeCtx.textAlign = 'center';
+  snakeCtx.fillText('ИГРА ОКОНЧЕНА', snakeCanvas.width / 2, snakeCanvas.height / 2 - 5);
+  snakeCtx.font = 'bold 14px Courier New';
+  snakeCtx.fillStyle = '#fff';
+  snakeCtx.fillText('Счёт: ' + snake
